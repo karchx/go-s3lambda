@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"path/filepath"
 	"s3lambda-api/aws"
 
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -46,7 +48,31 @@ func listCSVFilesInS3() ([]string, error) {
 	return fileNames, nil
 }
 
-func uploadFileHandler(w http.ResponseWriter, r *http.Request) {}
+func uploadFileHandler(w http.ResponseWriter, r *http.Request) {
+	file, metadata, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "Error upload file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	fileExtension := filepath.Ext(metadata.Filename)
+	if fileExtension != ".csv" {
+		http.Error(w, "Invalid file", http.StatusBadRequest)
+		return
+	}
+
+	fileContent, err := io.ReadAll(file)
+
+	err = uploadCSVToS3(metadata.Filename, fileContent)
+	if err != nil {
+		http.Error(w, "Error upload file", http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprintf(w, "Upload file")
+}
 
 func listFilesHandler(w http.ResponseWriter, r *http.Request) {
 	fileNames, err := listCSVFilesInS3()
