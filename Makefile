@@ -1,4 +1,4 @@
 .PHONY: build
 
 build:
-	goos=linux go build -o main main.go && zip main.zip main
+	goos=linux go build -ldflags="-s -w" -o bin/main main.go
