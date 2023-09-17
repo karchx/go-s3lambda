@@ -10,8 +10,8 @@ functions:
     handler: bin/main
     events:
       - http:
-          path: /ping
           method: GET
+          path: /list
 package:
   patterns:
     - '!*/**'
