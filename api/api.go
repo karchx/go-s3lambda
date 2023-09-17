@@ -2,14 +2,18 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"path/filepath"
 	"s3lambda-api/aws"
+	"s3lambda-api/utils"
 	"time"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gorilla/mux"
 )
@@ -20,8 +24,8 @@ const (
 )
 
 type ResponseFiles struct {
-	Name string `json:"name"`
-	Date time.Time  `json:"date"`
+	Name string    `json:"name"`
+	Date time.Time `json:"date"`
 }
 
 func uploadCSVToS3(filename string, fileContent []byte) error {
@@ -88,34 +92,40 @@ func uploadFileHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Upload file")
 }
 
-func listFilesHandler(w http.ResponseWriter, r *http.Request) {
+func listFilesHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	fileNames, err := listCSVFilesInS3()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return utils.ResponseInternalServerError(err.Error()), nil
 	}
 
 	responseJSON, err := json.Marshal(fileNames)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return utils.ResponseInternalServerError(err.Error()), nil
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(responseJSON)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return utils.ResponseOK(string(responseJSON)), nil
+
+	// w.Header().Set("Content-Type", "application/json")
+	// _, err = w.Write(responseJSON)
+	//
+	//	if err != nil {
+	//		http.Error(w, err.Error(), http.StatusInternalServerError)
+	//		return
+	//	}
 }
 
 func Init() {
 	r := mux.NewRouter()
 	r.HandleFunc("/upload", uploadFileHandler).Methods("POST")
-	r.HandleFunc("/list", listFilesHandler).Methods("GET")
-
+	r.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "Hello")
+	})
 	http.Handle("/", r)
-
-	fmt.Println("Server in port 8080")
+  log.Println("Starting up on own, port :8080")
 	http.ListenAndServe(":8080", nil)
+	//adapter := gorillamux.NewV2(r)
+	//r.HandleFunc("/list", listFilesHandler).Methods("GET")
+
+	//lambda.Start(adapter.ProxyWithContext)
+	// fmt.Println("Server in port 8080")
 }
