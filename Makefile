@@ -1,7 +1,7 @@
 .PHONY: build
 
 build:
-	goos=linux go build -ldflags="-s -w" -o bin/main main.go
+	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w" -o bin/main .
 
 .PHONY: deploy_prod
 

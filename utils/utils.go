@@ -7,6 +7,7 @@ import (
 )
 
 type ResponseGateway = events.APIGatewayProxyResponse
+type RequestGateway = events.APIGatewayProxyRequest
 
 func response(statusCode int, message string) ResponseGateway {
 	return events.APIGatewayProxyResponse{StatusCode: statusCode, Body: message}
