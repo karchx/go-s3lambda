@@ -6,4 +6,4 @@ build:
 .PHONY: deploy_prod
 
 deploy_prod: build
-	serverless deploy --stage prod --aws-profile gnu_keneth
+	serverless deploy --stage prod --aws-profile username
