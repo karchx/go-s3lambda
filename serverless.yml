@@ -16,8 +16,14 @@ functions:
     handler: bin/main
     events:
       - http:
+        method: GET
+        path: /health
+      - http:
           method: GET
           path: /list
+      - http:
+        method: POST
+        path: /upload
 package:
   patterns:
     - '!*/**'

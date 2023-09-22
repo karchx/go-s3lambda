@@ -113,14 +113,11 @@ func listFilesHandler(w http.ResponseWriter, r *http.Request) {
 
 func Init() {
 	r := mux.NewRouter()
-	//r.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-	//	io.WriteString(w, "Hello test")
-	//})
-	//r.HandleFunc("/upload", uploadFileHandler).Methods("POST")
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "Ready!")
+	})
+	r.HandleFunc("/upload", uploadFileHandler).Methods("POST")
 	r.HandleFunc("/list", listFilesHandler).Methods("GET")
-	//http.Handle("/", r)
-	//log.Println("Starting up on own, port :8080")
-	//http.ListenAndServe(":8080", nil)
 
 	lambda.Start(gorillamux.New(r).ProxyWithContext)
 }
