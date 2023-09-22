@@ -5,6 +5,12 @@ provider:
   runtime: go1.x
   region: us-east-1
   stage: ${opt:stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+      Resource: "arn:aws:s3:::my-bucket/*"
+
 functions:
   api:
     handler: bin/main
